@@ -26,7 +26,7 @@ class FCCL(FederatedModel):
 
     def __init__(self, nets_list,args, transform):
         super(FCCL, self).__init__(nets_list,args, transform)
-        self.pretrain = False
+        self.pretrain = True # this has been changed from true to false.
         self.load= True
 
         self.off_diag_weight=args.off_diag_weight
@@ -161,7 +161,7 @@ class FCCL(FederatedModel):
     def _pretrain_net(self,index,net,train_loader,epoch,test_loader):
         net = net.to(self.device)
         optimizer = optim.Adam(net.parameters(), lr=0.001)
-        scheduler = CosineLRScheduler(optimizer, t_initial=epoch, decay_rate=1., lr_min=1e-6)
+        scheduler = CosineLRScheduler(optimizer, t_initial=epoch, cycle_decay=1., lr_min=1e-6)
         criterion = nn.CrossEntropyLoss()
         criterion.to(self.device)
         iterator = tqdm(range(epoch))

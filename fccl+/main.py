@@ -53,7 +53,7 @@ def parse_args():
     else:
         best = best[-1]
     for key, value in best.items():
-        setattr(args, key, value)
+        setattr(args, key, value) # here this contains the batch_size
 
     if args.seed is not None:
         set_random_seed(args.seed)
@@ -61,7 +61,7 @@ def parse_args():
         if args.dataset in ['fl_cifar10']:
             args.parti_num = 10
         if args.dataset in ['fl_digits', 'fl_officehome', 'fl_officecaltech']:
-            args.parti_num = 4
+            args.parti_num = 4 # number of domains that are being dealt with are noted here
         if args.dataset in ['fl_office31']:
             args.parti_num = 3
 
@@ -75,12 +75,14 @@ def main(args=None):
     args.conf_jobnum = str(uuid.uuid4())
     args.conf_timestamp = str(datetime.datetime.now())
     args.conf_host = socket.gethostname()
-
+# -----------------------------------------------------
     priv_dataset = get_prive_dataset(args)
     publ_dataset = get_public_dataset(args)
+    
+# -----------------------------------------------------
 
     if args.structure == 'homogeneity':
-        backbones_list = priv_dataset.get_backbone(args.parti_num, None)
+        backbones_list = priv_dataset.get_backbone(args.parti_num, None) # the dataset is determining the model, the list is now None
 
     elif args.structure == 'heterogeneity':
         if priv_dataset.NAME in ['fl_digits']:
@@ -94,17 +96,17 @@ def main(args=None):
         selected_backbones_list = []
         for i in range(args.parti_num):
             index = i % len(backbones_names_list)
-            selected_backbones_list.append(backbones_names_list[index])
-        backbones_list = priv_dataset.get_backbone(args.parti_num, selected_backbones_list)
+            selected_backbones_list.append(backbones_names_list[index]) # names of the backbones
+        backbones_list = priv_dataset.get_backbone(args.parti_num, selected_backbones_list) # pass the list of names of the backbones
 
-    model = get_model(backbones_list, args, priv_dataset.get_transform())
+    model = get_model(backbones_list, args, priv_dataset.get_transform()) # what are these functions!?
 
     if args.structure not in model.COMPATIBILITY:
         print(model.NAME + ' does not support model heterogeneity')
     else:
         print('{}_{}_{}_{}_{}_{}'.format(args.model, args.dataset, args.communication_epoch, args.public_dataset, args.public_len, args.pub_aug))
         setproctitle.setproctitle('{}_{}_{}'.format(args.model, args.dataset, args.communication_epoch))
-        train(model, publ_dataset, priv_dataset, args)
+        train(model, publ_dataset, priv_dataset, args) # args i sbeing passed inside, where am I accessing the args.batch_size is the question, and where do I reset it.
 
 
 if __name__ == '__main__':

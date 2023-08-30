@@ -10,10 +10,101 @@ from backbone.efficientnet import EfficientNetB0
 from backbone.mobilnet_v2 import MobileNetV2
 from torchvision.datasets import MNIST, SVHN, ImageFolder, DatasetFolder, USPS
 
+#------------
+
+import sys, os
+base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(base_path)
+
+import torch
+from torch import nn, optim
+import time
+import copy
+# from nets.models import DigitModel
+import argparse
+import numpy as np
+import torchvision
+import torchvision.transforms as transforms
+import fedbn_digits as data_utils
+
+#---------
+"""
+batch_size and percent are the only two variables.
+"""
+def prepare_data(percent, batch_size):
+    # Prepare data
+    # the number ofop channels is 3!
+    
+    transform_mnist = transforms.Compose([
+            transforms.Grayscale(num_output_channels=3),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+
+    transform_svhn = transforms.Compose([
+            transforms.Resize([28,28]),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+
+    transform_usps = transforms.Compose([
+            transforms.Resize([28,28]),
+            transforms.Grayscale(num_output_channels=3),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+
+    transform_synth = transforms.Compose([
+            transforms.Resize([28,28]),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+
+    transform_mnistm = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+
+    # MNIST
+    mnist_trainset     = data_utils.DigitsDataset(data_path="./data/MNIST", channels=1, percent=percent, train=True,  transform=transform_mnist)
+    mnist_testset      = data_utils.DigitsDataset(data_path="./data/MNIST", channels=1, percent=percent, train=False, transform=transform_mnist)
+
+    # SVHN
+    svhn_trainset      = data_utils.DigitsDataset(data_path='./data/SVHN', channels=3, percent=percent,  train=True,  transform=transform_svhn)
+    svhn_testset       = data_utils.DigitsDataset(data_path='./data/SVHN', channels=3, percent=percent,  train=False, transform=transform_svhn)
+
+    # USPS
+    usps_trainset      = data_utils.DigitsDataset(data_path='./data/USPS', channels=1, percent=percent,  train=True,  transform=transform_usps)
+    usps_testset       = data_utils.DigitsDataset(data_path='./data/USPS', channels=1, percent=percent,  train=False, transform=transform_usps)
+
+    # Synth Digits
+    synth_trainset     = data_utils.DigitsDataset(data_path='./data/SynthDigits/', channels=3, percent=percent,  train=True,  transform=transform_synth)
+    synth_testset      = data_utils.DigitsDataset(data_path='./data/SynthDigits/', channels=3, percent=percent,  train=False, transform=transform_synth)
+
+    # MNIST-M
+    # mnistm_trainset     = data_utils.DigitsDataset(data_path='../data/MNIST_M/', channels=3, percent=percent,  train=True,  transform=transform_mnistm)
+    # mnistm_testset      = data_utils.DigitsDataset(data_path='../data/MNIST_M/', channels=3, percent=percent,  train=False, transform=transform_mnistm)
+
+    mnist_train_loader = torch.utils.data.DataLoader(mnist_trainset, batch_size=batch_size, shuffle=True)
+    mnist_test_loader  = torch.utils.data.DataLoader(mnist_testset, batch_size=batch_size, shuffle=False)
+    svhn_train_loader = torch.utils.data.DataLoader(svhn_trainset, batch_size=batch_size,  shuffle=True)
+    svhn_test_loader = torch.utils.data.DataLoader(svhn_testset, batch_size=batch_size, shuffle=False)
+    usps_train_loader = torch.utils.data.DataLoader(usps_trainset, batch_size=batch_size,  shuffle=True)
+    usps_test_loader = torch.utils.data.DataLoader(usps_testset, batch_size=batch_size, shuffle=False)
+    synth_train_loader = torch.utils.data.DataLoader(synth_trainset, batch_size=batch_size,  shuffle=True)
+    synth_test_loader = torch.utils.data.DataLoader(synth_testset, batch_size=batch_size, shuffle=False)
+    # mnistm_train_loader = torch.utils.data.DataLoader(mnistm_trainset, batch_size=batch_size,  shuffle=True)
+    # mnistm_test_loader = torch.utils.data.DataLoader(mnistm_testset, batch_size=batch_size, shuffle=False)
+
+    # change the size of the loaders here, only 4 are being used.
+    train_loaders = [mnist_train_loader, usps_train_loader,  svhn_train_loader, synth_train_loader]
+    test_loaders  = [mnist_test_loader,  usps_test_loader, svhn_test_loader, synth_test_loader]
+
+    return train_loaders, test_loaders
 
 class MyDigits(data.Dataset):
     def __init__(self, root, train=True, transform=None,
-                 target_transform=None, download=False, data_name=None) -> None:
+                 target_transform=None, download=True, data_name=None) -> None:
         self.not_aug_transform = transforms.Compose([transforms.ToTensor()])
         self.data_name = data_name
         self.root = root
@@ -22,7 +113,7 @@ class MyDigits(data.Dataset):
         self.target_transform = target_transform
         self.download = download
         self.dataset = self.__build_truncated_dataset__()
-
+        
     def __build_truncated_dataset__(self):
         if self.data_name == 'mnist':
             dataobj = MNIST(self.root, self.train, self.transform, self.target_transform, self.download)
@@ -79,6 +170,8 @@ class FedLeaDigits(FederatedDataset):
     # 0.0023,0.013,0.13,0.305
     N_SAMPLES_PER_Class = None
     N_CLASS = 10
+    PERCENT=0.1
+    # BATCH_SIZE  = 32 # I DO NOT KNOW
     Nor_TRANSFORM = transforms.Compose(
         [transforms.Resize((32, 32)),
          transforms.ToTensor(),
@@ -94,45 +187,50 @@ class FedLeaDigits(FederatedDataset):
 
     def get_data_loaders(self, selected_domain_list=[]):
 
-        using_list = self.DOMAINS_LIST if selected_domain_list == [] else selected_domain_list
+        # using_list = self.DOMAINS_LIST if selected_domain_list == [] else selected_domain_list
 
-        nor_transform = self.Nor_TRANSFORM
-        sin_chan_nor_transform = self.Singel_Channel_Nor_TRANSFORM
-        train_dataset_list = []
-        test_dataset_list = []
-        test_transform = transforms.Compose(
-            [transforms.Resize((32, 32)), transforms.ToTensor(), self.get_normalization_transform()])
-        sin_chan_test_transform = transforms.Compose(
-            [transforms.Resize((32, 32)), transforms.ToTensor(), transforms.Lambda(lambda x: x.repeat(3, 1, 1)), self.get_normalization_transform()])
-        for _, domain in enumerate(using_list):
-            if domain == 'syn':
-                train_dataset = ImageFolder_Custom(data_name=domain, root=data_path(), train=True,
-                                                   transform=nor_transform)
-            else:
-                if domain in ['mnist', 'usps']:
-                    train_dataset = MyDigits(data_path(), train=True,
-                                             download=True, transform=sin_chan_nor_transform, data_name=domain)
-                else:
-                    train_dataset = MyDigits(data_path(), train=True,
-                                             download=True, transform=nor_transform, data_name=domain)
-            train_dataset_list.append(train_dataset)
+        # nor_transform = self.Nor_TRANSFORM
+        # sin_chan_nor_transform = self.Singel_Channel_Nor_TRANSFORM
+        # train_dataset_list = []
+        # test_dataset_list = []
+        # test_transform = transforms.Compose(
+        #     [transforms.Resize((32, 32)), transforms.ToTensor(), self.get_normalization_transform()])
+        # sin_chan_test_transform = transforms.Compose(
+        #     [transforms.Resize((32, 32)), transforms.ToTensor(), transforms.Lambda(lambda x: x.repeat(3, 1, 1)), self.get_normalization_transform()])
+        # for _, domain in enumerate(using_list):
+        #     if domain == 'syn':
+        #         train_dataset = ImageFolder_Custom(data_name=domain, root=data_path(), train=True,
+        #                                            transform=nor_transform)
+        #     else:
+        #         if domain in ['mnist', 'usps']:
+        #             train_dataset = MyDigits(data_path(), train=True,
+        #                                      download=True, transform=sin_chan_nor_transform, data_name=domain)
+        #         else:
+        #             train_dataset = MyDigits(data_path(), train=True,
+        #                                      download=True, transform=nor_transform, data_name=domain)
+        #     train_dataset_list.append(train_dataset)
 
-        for _, domain in enumerate(self.DOMAINS_LIST):
-            if domain == 'syn':
-                test_dataset = ImageFolder_Custom(data_name=domain, root=data_path(), train=False,
-                                                  transform=test_transform)
-            else:
-                if domain in ['mnist', 'usps']:
-                    test_dataset = MyDigits(data_path(), train=False,
-                                            download=True, transform=sin_chan_test_transform, data_name=domain)
-                else:
+        # for _, domain in enumerate(self.DOMAINS_LIST):
+        #     if domain == 'syn':
+        #         test_dataset = ImageFolder_Custom(data_name=domain, root=data_path(), train=False,
+        #                                           transform=test_transform)
+        #     else:
+        #         if domain in ['mnist', 'usps']:
+        #             test_dataset = MyDigits(data_path(), train=False,
+        #                                     download=True, transform=sin_chan_test_transform, data_name=domain)
+        #         else:
 
-                    test_dataset = MyDigits(data_path(), train=False,
-                                            download=True, transform=test_transform, data_name=domain)
+        #             test_dataset = MyDigits(data_path(), train=False,
+        #                                     download=True, transform=test_transform, data_name=domain)
 
-            test_dataset_list.append(test_dataset)
-        traindls, testdls = partition_digits_domain_skew_loaders(train_dataset_list, test_dataset_list, self)
-
+        #     test_dataset_list.append(test_dataset)
+        # traindls, testdls = partition_digits_domain_skew_loaders(train_dataset_list, test_dataset_list, self)
+        #----------------------------------------------------------------
+        # over here I will rewrite the important terms of the equation, i.e. traindls and testdls. They will come from the technique that was mentioned in CYH's work
+        # here encode the fedbn terms!
+        # construct an args variable here that has those variables.
+        self.BATCH_SIZE = self.args.local_batch_size
+        traindls, testdls  = prepare_data(self.PERCENT, self.BATCH_SIZE) 
         return traindls, testdls
 
     @staticmethod
@@ -141,6 +239,7 @@ class FedLeaDigits(FederatedDataset):
             [transforms.ToPILImage(), FedLeaDigits.Nor_TRANSFORM])
         return transform
 
+    # this is the backbone that is used during the training phase
     @staticmethod
     def get_backbone(parti_num, names_list):
         nets_dict = {'resnet10': resnet10, 'resnet12': resnet12, 'efficient': EfficientNetB0, 'mobilnet': MobileNetV2}

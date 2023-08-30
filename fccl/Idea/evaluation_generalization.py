@@ -8,6 +8,7 @@ from fccl.Idea.params import args_parser
 
 import torch
 import torch.nn as nn
+import numpy as np
 from numpy import *
 import os
 

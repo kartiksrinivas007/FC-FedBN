@@ -9,10 +9,9 @@ from datasets.transforms.denormalization import DeNormalize
 class MyCifar100(CIFAR100):
 
     def __init__(self, root, train=True, transform=None,
-                 target_transform=None, download=False) -> None:
+                 target_transform=None, download=True) -> None:
         self.not_aug_transform = transforms.Compose([transforms.ToTensor()])
-        super(MyCifar100, self).__init__(
-            root, train, transform, target_transform, download)
+        super(MyCifar100, self).__init__(root, train, transform, target_transform, download)
 
     def __getitem__(self, index: int) -> Tuple[type(Image), int, type(Image)]:
         img, target = self.data[index], self.targets[index]
@@ -54,7 +53,7 @@ class PublicCIFAR100(PublicDataset):
         elif pub_aug =='strong':
             selected_transform = self.CON_TRANSFORM
         train_dataset = MyCifar100(data_path(), train=True,
-                                   download=False, transform=selected_transform)
+                                   download=True, transform=selected_transform)
         traindl = random_loaders(train_dataset,self)
         return traindl
 

@@ -7,14 +7,14 @@ def get_device(device_id) -> torch.device:
 
 
 def data_path() -> str:
-    return '/data0/data_wk/'
+    return './data/data_wk/'
 
 
 def base_path() -> str:
     """
     Returns the base bath where to log accuracies and tensorboard data.
     """
-    return './data/'
+    return './data_tensorboard/'
 
 def checkpoint_path() -> str:
     """

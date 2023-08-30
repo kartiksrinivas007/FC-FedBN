@@ -16,7 +16,7 @@ for model in get_all_models():
     dataset_classes_name = [x for x in mod.__dir__() if 'type' in str(type(getattr(mod, x))) and 'FederatedDataset' in str(inspect.getmro(getattr(mod, x))[1:])]
     for d in dataset_classes_name:
         c = getattr(mod, d)
-        Priv_NAMES[c.NAME] = c
+        Priv_NAMES[c.NAME] = c # passing in datasets.cifar100 type of a thing
 
 Pub_NAMES = {}
 for model in get_all_models():
@@ -30,7 +30,7 @@ for model in get_all_models():
 def get_prive_dataset(args: Namespace) -> FederatedDataset:
 
     assert args.dataset in Priv_NAMES.keys()
-    return Priv_NAMES[args.dataset](args)
+    return Priv_NAMES[args.dataset](args) # calling a constructor
 
 def get_public_dataset(args: Namespace) -> PublicDataset:
 
