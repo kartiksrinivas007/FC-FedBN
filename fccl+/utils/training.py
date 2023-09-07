@@ -11,7 +11,7 @@ import sys
 import numpy as np
 from utils.logger import CsvWriter
 from utils.util import save_networks
-
+from tqdm import tqdm
 
 def evaluate(model: FederatedModel, test_dl: DataLoader, setting: str, name: str) -> Tuple[list, list]:
     intra_accs = []
@@ -107,7 +107,10 @@ def train(model: FederatedModel, public_dataset: PublicDataset, private_dataset:
     mean_inter_acc_list = []
 
     Epoch = args.communication_epoch
-    for epoch_index in range(Epoch):
+    print(Epoch)
+    Epoch = 5 # hard coded
+    breakpoint()
+    for epoch_index in tqdm(range(Epoch)):
 
         model.epoch_index = epoch_index
 

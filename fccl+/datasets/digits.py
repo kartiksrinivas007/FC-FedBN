@@ -242,6 +242,7 @@ class FedLeaDigits(FederatedDataset):
     # this is the backbone that is used during the training phase
     @staticmethod
     def get_backbone(parti_num, names_list):
+        # may have to change this to change the backbone
         nets_dict = {'resnet10': resnet10, 'resnet12': resnet12, 'efficient': EfficientNetB0, 'mobilnet': MobileNetV2}
         nets_list = []
         if names_list == None:

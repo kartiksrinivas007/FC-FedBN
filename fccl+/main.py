@@ -53,7 +53,7 @@ def parse_args():
     else:
         best = best[-1]
     for key, value in best.items():
-        setattr(args, key, value) # here this contains the batch_size
+        setattr(args, key, value) # here this contains the batch_size # settattr is a new function in python that you have now learnt
 
     if args.seed is not None:
         set_random_seed(args.seed)
@@ -106,6 +106,7 @@ def main(args=None):
     else:
         print('{}_{}_{}_{}_{}_{}'.format(args.model, args.dataset, args.communication_epoch, args.public_dataset, args.public_len, args.pub_aug))
         setproctitle.setproctitle('{}_{}_{}'.format(args.model, args.dataset, args.communication_epoch))
+        # breakpoint()
         train(model, publ_dataset, priv_dataset, args) # args i sbeing passed inside, where am I accessing the args.batch_size is the question, and where do I reset it.
 
 

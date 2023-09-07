@@ -146,7 +146,7 @@ class FCCL(FederatedModel):
 
         if self.pretrain==True:
             for j in range(self.args.parti_num):
-                self._pretrain_net(j,self.intr_nets_list[j],self.trainloaders[j],50,self.testlodaers[j])
+                self._pretrain_net(j,self.intr_nets_list[j],self.trainloaders[j],10,self.testlodaers[j]) # hard coded here to be 50!
                 pretrain_path = os.path.join(self.checkpoint_path,'pretrain')
                 create_if_not_exists(pretrain_path)
                 save_path = os.path.join(pretrain_path,str(j)+'.ckpt')
@@ -161,7 +161,7 @@ class FCCL(FederatedModel):
     def _pretrain_net(self,index,net,train_loader,epoch,test_loader):
         net = net.to(self.device)
         optimizer = optim.Adam(net.parameters(), lr=0.001)
-        scheduler = CosineLRScheduler(optimizer, t_initial=epoch, cycle_decay=1., lr_min=1e-6)
+        scheduler = CosineLRScheduler(optimizer, t_initial=epoch+1, cycle_decay=1., lr_min=1e-6) #chanbged
         criterion = nn.CrossEntropyLoss()
         criterion.to(self.device)
         iterator = tqdm(range(epoch))
