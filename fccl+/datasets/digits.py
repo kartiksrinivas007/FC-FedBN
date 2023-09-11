@@ -9,7 +9,11 @@ from backbone.ResNet import resnet10, resnet12
 from backbone.efficientnet import EfficientNetB0
 from backbone.mobilnet_v2 import MobileNetV2
 from torchvision.datasets import MNIST, SVHN, ImageFolder, DatasetFolder, USPS
-
+# from backbone.BN_models import AlexNetBN, ConvNet, 
+from backbone.utils import get_network
+"""
+As you can see all the models have been pulled from the module named backbone
+"""
 #------------
 
 import sys, os
@@ -34,33 +38,35 @@ batch_size and percent are the only two variables.
 def prepare_data(percent, batch_size):
     # Prepare data
     # the number ofop channels is 3!
-    
+    image_size = [32, 32] # important resizing operation! necessary for each to work!
     transform_mnist = transforms.Compose([
+            transforms.Resize(image_size),
             transforms.Grayscale(num_output_channels=3),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
 
     transform_svhn = transforms.Compose([
-            transforms.Resize([28,28]),
+            transforms.Resize(image_size),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
 
     transform_usps = transforms.Compose([
-            transforms.Resize([28,28]),
+            transforms.Resize(image_size),
             transforms.Grayscale(num_output_channels=3),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
 
     transform_synth = transforms.Compose([
-            transforms.Resize([28,28]),
+            transforms.Resize(image_size),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
 
     transform_mnistm = transforms.Compose([
+            transforms.Resize(image_size),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
@@ -164,7 +170,7 @@ class ImageFolder_Custom(DatasetFolder):
 
 class FedLeaDigits(FederatedDataset):
     NAME = 'fl_digits'
-    SETTING = 'domain_skew'
+    SETTING = 'domain_skew' # it is a domain_skew setup
     DOMAINS_LIST = ['mnist', 'usps', 'svhn', 'syn']
     percent_dict = {'mnist': 0.0023, 'usps': 0.013, 'svhn': 0.13, 'syn': 0.23}
     # 0.0023,0.013,0.13,0.305
@@ -231,6 +237,9 @@ class FedLeaDigits(FederatedDataset):
         # construct an args variable here that has those variables.
         self.BATCH_SIZE = self.args.local_batch_size
         traindls, testdls  = prepare_data(self.PERCENT, self.BATCH_SIZE) 
+        # it = iter(testdls[0])
+        # x, y = next(it)
+        # print(x.shape)
         return traindls, testdls
 
     @staticmethod
@@ -243,16 +252,23 @@ class FedLeaDigits(FederatedDataset):
     @staticmethod
     def get_backbone(parti_num, names_list):
         # may have to change this to change the backbone
-        nets_dict = {'resnet10': resnet10, 'resnet12': resnet12, 'efficient': EfficientNetB0, 'mobilnet': MobileNetV2}
+        nets_dict = {'resnet10': resnet10, 'resnet12': resnet12, 'efficient': EfficientNetB0, 'mobilnet': MobileNetV2, 
+                     'AlexNetBN': get_network, 'ConvNetBN': get_network, 'VGG11BN':get_network}
         nets_list = []
         if names_list == None:
             for j in range(parti_num):
-                nets_list.append(resnet12(FedLeaDigits.N_CLASS))
+                nets_list.append(resnet12(FedLeaDigits.N_CLASS)) # simply get a resent 12 with the number of classes mentioned as an argument
         else:
             for j in range(parti_num):
                 net_name = names_list[j]
-                nets_list.append(nets_dict[net_name](FedLeaDigits.N_CLASS))
-        return nets_list
+                if(nets_dict[net_name] == get_network):
+                    print("Yo im inside and the if condition worked!")
+                    # breakpoint()
+                    print(net_name, FedLeaDigits.N_CLASS)
+                    nets_list.append(nets_dict[net_name](net_name, 3, FedLeaDigits.N_CLASS, (32, 32)))
+                else:
+                    nets_list.append(nets_dict[net_name](FedLeaDigits.N_CLASS)) # style of calling is going to be different
+        return nets_list 
 
     @staticmethod
     def get_normalization_transform():
