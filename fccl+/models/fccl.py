@@ -26,7 +26,7 @@ class FCCL(FederatedModel):
 
     def __init__(self, nets_list,args, transform):
         super(FCCL, self).__init__(nets_list,args, transform)
-        self.pretrain = True # this has been changed from true to false.
+        self.pretrain = True # this has been changed for the algorithm to correctly pretrain the nets
         self.load= True
 
         self.off_diag_weight=args.off_diag_weight
@@ -169,6 +169,7 @@ class FCCL(FederatedModel):
             for batch_idx, (images, labels) in enumerate(train_loader):
                 images = images.to(self.device)
                 labels = labels.to(self.device)
+                # print(images.shape)
                 outputs = net(images)
                 loss = criterion(outputs, labels)
                 optimizer.zero_grad()
