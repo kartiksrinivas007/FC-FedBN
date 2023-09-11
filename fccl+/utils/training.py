@@ -71,7 +71,7 @@ def evaluate(model: FederatedModel, test_dl: DataLoader, setting: str, name: str
             inter_accs.append(np.mean(inter_net_accs))
             net.train(status)
     elif setting == 'label_skew':
-        inter_accs = intra_accs
+        inter_accs = intra_accs # yoooooooooooo what is this?
     return intra_accs, inter_accs
 
 
@@ -108,7 +108,7 @@ def train(model: FederatedModel, public_dataset: PublicDataset, private_dataset:
 
     Epoch = args.communication_epoch
     print(Epoch)
-    Epoch = 5 # hard coded
+    Epoch = 1 # hard coded
     breakpoint()
     for epoch_index in tqdm(range(Epoch)):
 
@@ -146,8 +146,8 @@ def train(model: FederatedModel, public_dataset: PublicDataset, private_dataset:
 
         intra_accs, inter_accs = evaluate(model, test_loaders, private_dataset.SETTING, private_dataset.NAME)
 
-        mean_intra_acc = round(np.mean(intra_accs, axis=0), 3)
-        mean_inter_acc = round(np.mean(inter_accs, axis=0), 3)
+        mean_intra_acc = np.mean(intra_accs, axis=0)
+        mean_inter_acc = np.mean(inter_accs, axis=0)
         mean_intra_acc_list.append(mean_intra_acc)
         mean_inter_acc_list.append(mean_inter_acc)
 
@@ -158,7 +158,7 @@ def train(model: FederatedModel, public_dataset: PublicDataset, private_dataset:
 
         for i in range(len(intra_accs)):
             if i in intra_accs_dict:
-                intra_accs_dict[i].append(intra_accs[i])
+                intra_accs_dict[i].append(intra_accs[i]) # per epoch of each model i being appended
             else:
                 intra_accs_dict[i] = [intra_accs[i]]
 
@@ -169,5 +169,6 @@ def train(model: FederatedModel, public_dataset: PublicDataset, private_dataset:
                 inter_accs_dict[i] = [inter_accs[i]]
 
     if args.csv_log:
-
+        print(inter_accs_dict, intra_accs_dict, mean_inter_acc_list, mean_intra_acc_list)
+        breakpoint()
         csv_writer.write_acc(intra_accs_dict, inter_accs_dict, mean_intra_acc_list, mean_inter_acc_list)
