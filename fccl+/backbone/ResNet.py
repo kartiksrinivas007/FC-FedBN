@@ -55,7 +55,7 @@ class BasicBlock(nn.Module):
         out = relu(out)
         return out
 
-
+# this is a ResNet from scratch !
 class ResNet(nn.Module):
     """
     ResNet network architecture. Designed for complex datasets.
@@ -71,11 +71,11 @@ class ResNet(nn.Module):
         :param nf: the number of filters
         """
         super(ResNet, self).__init__()
-        self.in_planes = nf
+        self.in_planes = nf # the input planes
         self.block = block
         self.num_classes = num_classes
         self.nf = nf
-        self.conv1 = conv3x3(3, nf * 1)
+        self.conv1 = conv3x3(3, nf * 1) # 3 is the number of channels then! that is good news!
         self.bn1 = nn.BatchNorm2d(nf * 1)
         self.layer1 = self._make_layer(block, nf * 1, num_blocks[0], stride=1)
         self.layer2 = self._make_layer(block, nf * 2, num_blocks[1], stride=2)
