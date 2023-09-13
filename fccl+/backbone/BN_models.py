@@ -49,6 +49,11 @@ class ConvNet(nn.Module):
         out = self.classifier(feature)
         return out # modified to only return the output and not the features
 
+    def feature(self, x):
+        out = self.features(x)
+        out = out.view(out.size(0), -1)
+        return out
+    
     def embed(self, x):
         out = self.features(x)
         out = out.view(out.size(0), -1)
@@ -166,6 +171,11 @@ class AlexNet(nn.Module):
         x = self.fc(x)
         return x
 
+    def feature(self, x):
+        x = self.features(x)
+        x = x.view(x.size(0), -1) # these are flattened features!
+        return x
+    
     def embed(self, x):
         x = self.features(x)
         x = x.view(x.size(0), -1)
@@ -212,6 +222,11 @@ class AlexNetBN(nn.Module):
         out = self.fc(feature)
         return out # why are there two outputs here!
 
+    def feature(self, x):
+        x = self.features(x)
+        x = x.view(x.size(0), -1)
+        return x
+    
     def embed(self, x):
         x = self.features(x)
         x = x.view(x.size(0), -1)
