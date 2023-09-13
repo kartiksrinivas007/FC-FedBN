@@ -17,7 +17,8 @@
 #python main.py --model fcclwe  --device_id 6 --dataset fl_officehome --structure heterogeneity --csv_log&
 #python main.py --model fcclkeyl  --device_id 7 --dataset fl_digits --structure homogeneity --csv_log
 #python main.py --model fcclwe  --device_id 7 --dataset fl_digits --structure homogeneity --csv_log&
-python main.py --model fccl  --device_id 0 --dataset fl_digits --structure heterogeneity --csv_log
+# python main.py --model fccl  --device_id 0 --dataset fl_digits --structure heterogeneity --csv_log
+python main.py --model feddf  --device_id 0 --dataset fl_digits --structure heterogeneity --csv_log
 # python main.py --model fccl  --device_id 1 --dataset fl_office31 --structure homogeneity --csv_log&
 
 
