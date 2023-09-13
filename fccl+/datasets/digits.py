@@ -253,7 +253,8 @@ class FedLeaDigits(FederatedDataset):
     def get_backbone(parti_num, names_list):
         # may have to change this to change the backbone
         nets_dict = {'resnet10': resnet10, 'resnet12': resnet12, 'efficient': EfficientNetB0, 'mobilnet': MobileNetV2, 
-                     'AlexNetBN': get_network, 'ConvNetBN': get_network, 'VGG11BN':get_network}
+                     'AlexNetBN': get_network, 'ConvNetBN': get_network, 'VGG11BN':get_network,
+                     'AlexNet':get_network, 'ConvNet': get_network}
         nets_list = []
         if names_list == None:
             for j in range(parti_num):
