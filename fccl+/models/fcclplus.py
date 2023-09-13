@@ -33,7 +33,7 @@ class FCCLPLUS(FederatedModel):
         self.prev_nets_list = []
 
     def ini(self):
-
+        # it is loading the state dicts directly, which is weird. Is there no pretraining for fccl+?
         for j in range(self.args.parti_num):
             self.prev_nets_list.append(copy.deepcopy(self.nets_list[j]))
 
@@ -63,7 +63,11 @@ class FCCLPLUS(FederatedModel):
                     linear_output = net(images)
                     linear_output_target_list.append(linear_output.clone().detach())
                     linear_output_list.append(linear_output)
+                    # breakpoint()
                     features = net.features(images)
+                    if features.dim() > 2:
+                        features = net.feature(images)
+                    
                     features = F.normalize(features, dim=1)
                     logits_sim = self._calculate_isd_sim(features)
                     logits_sim_target_list.append(logits_sim.clone().detach())
@@ -150,7 +154,7 @@ class FCCLPLUS(FederatedModel):
         criterionCE.to(self.device)
         criterionKL = nn.KLDivLoss(reduction='batchmean')
         criterionKL.to(self.device)
-        iterator = tqdm(range(self.local_epoch))
+        iterator = tqdm(range(self.local_epoch)) # local epochs
         for _ in iterator:
             for batch_idx, (images, labels) in enumerate(train_loader):
                 images = images.to(self.device)
