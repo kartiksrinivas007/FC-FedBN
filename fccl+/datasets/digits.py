@@ -88,8 +88,8 @@ def prepare_data(percent, batch_size):
     synth_testset      = data_utils.DigitsDataset(data_path='./data/SynthDigits/', channels=3, percent=percent,  train=False, transform=transform_synth)
 
     # MNIST-M
-    # mnistm_trainset     = data_utils.DigitsDataset(data_path='../data/MNIST_M/', channels=3, percent=percent,  train=True,  transform=transform_mnistm)
-    # mnistm_testset      = data_utils.DigitsDataset(data_path='../data/MNIST_M/', channels=3, percent=percent,  train=False, transform=transform_mnistm)
+    mnistm_trainset     = data_utils.DigitsDataset(data_path='./data/MNIST_M/', channels=3, percent=percent,  train=True,  transform=transform_mnistm)
+    mnistm_testset      = data_utils.DigitsDataset(data_path='./data/MNIST_M/', channels=3, percent=percent,  train=False, transform=transform_mnistm)
 
     mnist_train_loader = torch.utils.data.DataLoader(mnist_trainset, batch_size=batch_size, shuffle=True)
     mnist_test_loader  = torch.utils.data.DataLoader(mnist_testset, batch_size=batch_size, shuffle=False)
@@ -99,12 +99,12 @@ def prepare_data(percent, batch_size):
     usps_test_loader = torch.utils.data.DataLoader(usps_testset, batch_size=batch_size, shuffle=False)
     synth_train_loader = torch.utils.data.DataLoader(synth_trainset, batch_size=batch_size,  shuffle=True)
     synth_test_loader = torch.utils.data.DataLoader(synth_testset, batch_size=batch_size, shuffle=False)
-    # mnistm_train_loader = torch.utils.data.DataLoader(mnistm_trainset, batch_size=batch_size,  shuffle=True)
-    # mnistm_test_loader = torch.utils.data.DataLoader(mnistm_testset, batch_size=batch_size, shuffle=False)
+    mnistm_train_loader = torch.utils.data.DataLoader(mnistm_trainset, batch_size=batch_size,  shuffle=True)
+    mnistm_test_loader = torch.utils.data.DataLoader(mnistm_testset, batch_size=batch_size, shuffle=False)
 
     # change the size of the loaders here, only 4 are being used.
-    train_loaders = [mnist_train_loader, usps_train_loader,  svhn_train_loader, synth_train_loader]
-    test_loaders  = [mnist_test_loader,  usps_test_loader, svhn_test_loader, synth_test_loader]
+    train_loaders = [mnist_train_loader, usps_train_loader,  svhn_train_loader, synth_train_loader, mnistm_train_loader]
+    test_loaders  = [mnist_test_loader,  usps_test_loader, svhn_test_loader, synth_test_loader, mnistm_test_loader]
 
     return train_loaders, test_loaders
 
