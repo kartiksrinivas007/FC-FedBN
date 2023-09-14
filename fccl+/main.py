@@ -61,7 +61,7 @@ def parse_args():
         if args.dataset in ['fl_cifar10']:
             args.parti_num = 10
         if args.dataset in ['fl_digits', 'fl_officehome', 'fl_officecaltech']:
-            args.parti_num = 4 # number of domains that are being dealt with are noted here
+            args.parti_num = 5 # number of domains that are being dealt with are noted here
         if args.dataset in ['fl_office31']:
             args.parti_num = 3
 
