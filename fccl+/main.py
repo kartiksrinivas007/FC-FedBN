@@ -86,7 +86,7 @@ def main(args=None):
 
     elif args.structure == 'heterogeneity':
         if priv_dataset.NAME in ['fl_digits']:
-            backbones_names_list = ['AlexNet', 'ConvNet','AlexNetBN', 'ConvNetBN' , 'VGG11BN' , 'AlexNetBN' ,'resnet10', 'resnet12', 'efficient', 'mobilnet']
+            backbones_names_list = ['AlexNet', 'ConvNet','AlexNet', 'ConvNet' , 'VGG11BN' , 'AlexNetBN' ,'resnet10', 'resnet12', 'efficient', 'mobilnet']
         elif priv_dataset.NAME in ['fl_officecaltech']:
             backbones_names_list = ['googlenet', 'resnet12', 'resnet10', 'resnet12']
         elif priv_dataset.NAME in ['fl_officehome']:
