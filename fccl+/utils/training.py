@@ -108,8 +108,8 @@ def train(model: FederatedModel, public_dataset: PublicDataset, private_dataset:
 
     Epoch = args.communication_epoch
     print(Epoch)
-    Epoch = 1 # hard coded
-    breakpoint()
+    Epoch = 50 # hard coded was 50 earlier
+    # breakpoint()
     for epoch_index in tqdm(range(Epoch)):
 
         model.epoch_index = epoch_index
@@ -169,6 +169,6 @@ def train(model: FederatedModel, public_dataset: PublicDataset, private_dataset:
                 inter_accs_dict[i] = [inter_accs[i]]
 
     if args.csv_log:
-        print(inter_accs_dict, intra_accs_dict, mean_inter_acc_list, mean_intra_acc_list)
-        breakpoint()
+        # print(inter_accs_dict, intra_accs_dict, mean_inter_acc_list, mean_intra_acc_list)
+        print('Writing to csv')
         csv_writer.write_acc(intra_accs_dict, inter_accs_dict, mean_intra_acc_list, mean_inter_acc_list)
