@@ -263,8 +263,7 @@ class FedLeaDigits(FederatedDataset):
             for j in range(parti_num):
                 net_name = names_list[j]
                 if(nets_dict[net_name] == get_network):
-                    print("Yo im inside and the if condition worked!")
-                    # breakpoint()
+                    print(f"Model {j} is {net_name}")
                     print(net_name, FedLeaDigits.N_CLASS)
                     nets_list.append(nets_dict[net_name](net_name, 3, FedLeaDigits.N_CLASS, (32, 32)))
                 else:

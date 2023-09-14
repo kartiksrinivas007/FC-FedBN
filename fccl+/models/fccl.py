@@ -146,7 +146,7 @@ class FCCL(FederatedModel):
 
         if self.pretrain==True:
             for j in range(self.args.parti_num):
-                self._pretrain_net(j,self.intr_nets_list[j],self.trainloaders[j],10,self.testlodaers[j]) # hard coded here to be 50!
+                self._pretrain_net(j,self.intr_nets_list[j],self.trainloaders[j],50,self.testlodaers[j]) # hard coded here to be 50, was earlier 50, you can change it if you want
                 pretrain_path = os.path.join(self.checkpoint_path,'pretrain')
                 create_if_not_exists(pretrain_path)
                 save_path = os.path.join(pretrain_path,str(j)+'.ckpt')
